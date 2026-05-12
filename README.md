@@ -1,6 +1,6 @@
 # Suivi de budget PWA
 
-Cette version est installable sur Android depuis Chrome, à condition d’être publiée sur une adresse HTTPS.
+Cette version est installable sur Android depuis un navigateur.
 
 ## Fichiers inclus
 
