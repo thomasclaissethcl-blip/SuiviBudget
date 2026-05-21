@@ -19,13 +19,12 @@
       --primary: #1f6feb;
       --danger: #c62828;
       --success: #16794c;
+      --warning: #8a5a00;
       --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
       --radius: 18px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -74,19 +73,10 @@
       line-height: 1;
     }
 
-    .negative {
-      color: var(--danger);
-    }
+    .negative { color: var(--danger); }
+    .positive { color: var(--success); }
 
-    .positive {
-      color: var(--success);
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
+    button, input, select { font: inherit; }
 
     button {
       border: 0;
@@ -104,9 +94,9 @@
       color: #16325c;
     }
 
-    button.danger {
-      background: var(--danger);
-    }
+    button.danger { background: var(--danger); }
+    button.success { background: var(--success); }
+    button.warning { background: var(--warning); }
 
     button.icon {
       width: 42px;
@@ -136,9 +126,7 @@
       margin-top: 14px;
     }
 
-    .form.visible {
-      display: grid;
-    }
+    .form.visible { display: grid; }
 
     label {
       display: grid;
@@ -147,8 +135,7 @@
       font-size: 0.92rem;
     }
 
-    input,
-    select {
+    input, select {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: 12px;
@@ -159,7 +146,7 @@
 
     .tools {
       display: grid;
-      grid-template-columns: 1fr 180px;
+      grid-template-columns: 1fr 180px 180px;
       gap: 10px;
       margin-top: 12px;
     }
@@ -170,7 +157,7 @@
       margin-top: 14px;
     }
 
-    .expense {
+    .transaction {
       display: grid;
       grid-template-columns: 1fr auto auto;
       gap: 10px;
@@ -181,17 +168,26 @@
       background: #fbfcfe;
     }
 
-    .expense-name {
+    .transaction-name {
       font-weight: 700;
       overflow-wrap: anywhere;
     }
 
-    .expense-amount {
+    .transaction-type {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-top: 3px;
+    }
+
+    .transaction-amount {
       font-weight: 800;
       white-space: nowrap;
     }
 
-    .expense-actions {
+    .transaction-amount.income { color: var(--success); }
+    .transaction-amount.expense { color: var(--danger); }
+
+    .transaction-actions {
       display: flex;
       gap: 8px;
     }
@@ -219,9 +215,7 @@
       padding: 0;
     }
 
-    dialog::backdrop {
-      background: rgba(0, 0, 0, 0.35);
-    }
+    dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
 
     .dialog-content {
       padding: 18px;
@@ -238,6 +232,7 @@
       display: flex;
       justify-content: flex-end;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     @media (max-width: 680px) {
@@ -246,52 +241,25 @@
         margin: 12px auto;
       }
 
-      .form,
-      .form.visible,
-      .tools,
-      .expense {
+      .form, .form.visible, .tools, .transaction {
         grid-template-columns: 1fr;
       }
 
-      .remaining {
-        align-items: flex-start;
-      }
-
-      .expense-actions {
-        justify-content: flex-start;
-      }
-
-      .actions button {
-        flex: 1 1 auto;
-      }
+      .remaining { align-items: flex-start; }
+      .transaction-actions { justify-content: flex-start; }
+      .actions button { flex: 1 1 auto; }
     }
 
     @media print {
-      body {
-        background: white;
-      }
+      body { background: white; }
+      main { width: 100%; margin: 0; }
+      .card { box-shadow: none; }
 
-      main {
-        width: 100%;
-        margin: 0;
-      }
-
-      .card {
-        box-shadow: none;
-      }
-
-      .actions,
-      .form,
-      .tools,
-      .expense-actions,
-      .storage-note,
-      button {
+      .actions, .form, .tools, .transaction-actions, .storage-note, button {
         display: none !important;
       }
 
-      .expense {
-        grid-template-columns: 1fr auto;
-      }
+      .transaction { grid-template-columns: 1fr auto; }
     }
   </style>
 </head>
@@ -308,30 +276,32 @@
 
       <section class="card">
         <div class="actions">
-          <button id="toggleForm">Ajouter une dépense</button>
+          <button id="toggleExpenseForm">Ajouter une dépense</button>
+          <button id="toggleIncomeForm" class="success">Ajouter une rentrée</button>
           <button id="exportPdf" class="secondary">Exporter en PDF</button>
           <button id="backupJson" class="secondary">Sauvegarder</button>
           <button id="restoreJson" class="secondary">Importer</button>
+          <button id="resetMonth" class="warning">Réinitialiser</button>
           <input id="restoreFile" type="file" accept="application/json" hidden>
         </div>
 
-        <form id="expenseForm" class="form" autocomplete="off">
+        <form id="transactionForm" class="form" autocomplete="off">
           <label>
             Nom
-            <input id="expenseName" type="text" placeholder="Ex. Courses" required>
+            <input id="transactionName" type="text" placeholder="Ex. Courses" required>
           </label>
           <label>
             Montant
-            <input id="expenseAmount" type="number" min="0" step="1" placeholder="Ex. 35" required>
+            <input id="transactionAmount" type="number" min="0" step="1" placeholder="Ex. 35" required>
           </label>
-          <button type="submit">Valider</button>
+          <button id="transactionSubmit" type="submit">Valider</button>
         </form>
       </section>
 
       <section class="card">
         <label>
           Rechercher
-          <input id="search" type="search" placeholder="Rechercher une dépense">
+          <input id="search" type="search" placeholder="Rechercher une opération">
         </label>
 
         <div class="tools">
@@ -341,13 +311,17 @@
               <option value="date-desc">Plus récentes</option>
               <option value="az">A-Z</option>
               <option value="za">Z-A</option>
-              <option value="amount-desc">Dépenses décroissantes</option>
-              <option value="amount-asc">Dépenses croissantes</option>
+              <option value="amount-desc">Montants décroissants</option>
+              <option value="amount-asc">Montants croissants</option>
             </select>
           </label>
           <label>
             Total dépensé
             <input id="spent" type="text" readonly>
+          </label>
+          <label>
+            Total rentré
+            <input id="income" type="text" readonly>
           </label>
         </div>
 
@@ -374,33 +348,80 @@
     </form>
   </dialog>
 
+  <dialog id="resetDialog">
+    <form method="dialog" class="dialog-content">
+      <h2>Réinitialiser</h2>
+      <p>Cette action supprime les dépenses et les rentrées enregistrées. Vous pouvez conserver le budget actuel ou le remettre à zéro.</p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="cancelReset">Annuler</button>
+        <button type="button" class="warning" id="clearTransactions">Conserver le budget</button>
+        <button type="button" class="danger" id="clearAll">Tout remettre à zéro</button>
+      </div>
+    </form>
+  </dialog>
+
   <script>
-    const STORAGE_KEY = "suivi-budget-pwa-v1";
+    const STORAGE_KEY = "suivi-budget-pwa-v2";
+    const LEGACY_STORAGE_KEY = "suivi-budget-pwa-v1";
 
     const state = loadState();
+    let currentTransactionType = "expense";
 
     const remainingEl = document.getElementById("remaining");
     const spentEl = document.getElementById("spent");
+    const incomeEl = document.getElementById("income");
     const listEl = document.getElementById("list");
     const searchEl = document.getElementById("search");
     const sortEl = document.getElementById("sort");
-    const formEl = document.getElementById("expenseForm");
-    const nameEl = document.getElementById("expenseName");
-    const amountEl = document.getElementById("expenseAmount");
+    const formEl = document.getElementById("transactionForm");
+    const nameEl = document.getElementById("transactionName");
+    const amountEl = document.getElementById("transactionAmount");
+    const submitEl = document.getElementById("transactionSubmit");
     const budgetDialog = document.getElementById("budgetDialog");
     const budgetInput = document.getElementById("budgetInput");
+    const resetDialog = document.getElementById("resetDialog");
     const restoreFile = document.getElementById("restoreFile");
 
+    function normalizeTransaction(item) {
+      return {
+        id: item.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
+        name: typeof item.name === "string" && item.name.trim() ? item.name.trim() : "Opération",
+        amount: Math.max(0, Math.round(Number(item.amount)) || 0),
+        type: item.type === "income" ? "income" : "expense",
+        createdAt: Number(item.createdAt) || Date.now()
+      };
+    }
+
     function loadState() {
-      const fallback = { budget: 0, expenses: [] };
+      const fallback = { budget: 0, transactions: [] };
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        let raw = localStorage.getItem(STORAGE_KEY);
+        let source = "current";
+
+        if (!raw) {
+          raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+          source = "legacy";
+        }
+
         if (!raw) return fallback;
+
         const parsed = JSON.parse(raw);
-        return {
+        const transactions = Array.isArray(parsed.transactions)
+          ? parsed.transactions
+          : Array.isArray(parsed.expenses)
+            ? parsed.expenses.map(item => ({ ...item, type: "expense" }))
+            : [];
+
+        const migrated = {
           budget: Number.isInteger(parsed.budget) ? parsed.budget : Math.round(Number(parsed.budget)) || 0,
-          expenses: Array.isArray(parsed.expenses) ? parsed.expenses : []
+          transactions: transactions.map(normalizeTransaction)
         };
+
+        if (source === "legacy") {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        }
+
+        return migrated;
       } catch {
         return fallback;
       }
@@ -414,21 +435,25 @@
       return `${Math.round(value).toLocaleString("fr-FR")} €`;
     }
 
-    function totalSpent() {
-      return state.expenses.reduce((sum, item) => sum + item.amount, 0);
+    function totalByType(type) {
+      return state.transactions
+        .filter(item => item.type === type)
+        .reduce((sum, item) => sum + item.amount, 0);
     }
 
     function render() {
-      const spent = totalSpent();
-      const remaining = state.budget - spent;
+      const spent = totalByType("expense");
+      const income = totalByType("income");
+      const remaining = state.budget + income - spent;
 
       remainingEl.textContent = euro(remaining);
       remainingEl.classList.toggle("negative", remaining < 0);
       remainingEl.classList.toggle("positive", remaining >= 0);
       spentEl.value = euro(spent);
+      incomeEl.value = euro(income);
 
       const query = searchEl.value.trim().toLowerCase();
-      let items = state.expenses.filter(item => item.name.toLowerCase().includes(query));
+      let items = state.transactions.filter(item => item.name.toLowerCase().includes(query));
 
       const sort = sortEl.value;
       items.sort((a, b) => {
@@ -444,38 +469,46 @@
       if (!items.length) {
         const empty = document.createElement("div");
         empty.className = "empty";
-        empty.textContent = state.expenses.length ? "Aucune dépense ne correspond à la recherche." : "Aucune dépense enregistrée.";
+        empty.textContent = state.transactions.length ? "Aucune opération ne correspond à la recherche." : "Aucune opération enregistrée.";
         listEl.appendChild(empty);
         return;
       }
 
       for (const item of items) {
         const row = document.createElement("article");
-        row.className = "expense";
+        row.className = "transaction";
+
+        const nameWrapper = document.createElement("div");
 
         const name = document.createElement("div");
-        name.className = "expense-name";
+        name.className = "transaction-name";
         name.textContent = item.name;
 
+        const type = document.createElement("div");
+        type.className = "transaction-type";
+        type.textContent = item.type === "income" ? "Rentrée d’argent" : "Dépense";
+
+        nameWrapper.append(name, type);
+
         const amount = document.createElement("div");
-        amount.className = "expense-amount";
-        amount.textContent = euro(item.amount);
+        amount.className = `transaction-amount ${item.type}`;
+        amount.textContent = `${item.type === "income" ? "+" : "−"} ${euro(item.amount)}`;
 
         const actions = document.createElement("div");
-        actions.className = "expense-actions";
+        actions.className = "transaction-actions";
 
         const edit = document.createElement("button");
         edit.className = "small secondary";
         edit.textContent = "Modifier";
-        edit.addEventListener("click", () => editExpense(item.id));
+        edit.addEventListener("click", () => editTransaction(item.id));
 
         const del = document.createElement("button");
         del.className = "small danger";
         del.textContent = "Supprimer";
-        del.addEventListener("click", () => deleteExpense(item.id));
+        del.addEventListener("click", () => deleteTransaction(item.id));
 
         actions.append(edit, del);
-        row.append(name, amount, actions);
+        row.append(nameWrapper, amount, actions);
         listEl.appendChild(row);
       }
     }
@@ -487,46 +520,65 @@
       budgetInput.select();
     }
 
-    function addExpense(name, amount) {
-      state.expenses.push({
+    function openTransactionForm(type) {
+      currentTransactionType = type;
+      submitEl.textContent = type === "income" ? "Ajouter la rentrée" : "Ajouter la dépense";
+      nameEl.placeholder = type === "income" ? "Ex. Remboursement" : "Ex. Courses";
+      formEl.classList.add("visible");
+      nameEl.focus();
+    }
+
+    function addTransaction(name, amount, type) {
+      state.transactions.push({
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
         name,
         amount,
+        type,
         createdAt: Date.now()
       });
       saveState();
       render();
     }
 
-    function editExpense(id) {
-      const item = state.expenses.find(expense => expense.id === id);
+    function editTransaction(id) {
+      const item = state.transactions.find(transaction => transaction.id === id);
       if (!item) return;
 
-      const newName = prompt("Nom de la dépense", item.name);
+      const newName = prompt("Nom de l’opération", item.name);
       if (newName === null) return;
 
       const cleanName = newName.trim();
       if (!cleanName) return;
 
-      const newAmount = prompt("Montant de la dépense", item.amount);
+      const newAmount = prompt("Montant de l’opération", item.amount);
       if (newAmount === null) return;
 
       const amount = Math.round(Number(newAmount));
       if (!Number.isFinite(amount) || amount < 0) return;
 
+      const newType = prompt("Type d’opération : dépense ou rentrée", item.type === "income" ? "rentrée" : "dépense");
+      if (newType === null) return;
+
+      const cleanType = newType.trim().toLowerCase();
+      if (!["dépense", "depense", "rentrée", "rentree"].includes(cleanType)) {
+        alert("Type non reconnu. Utilisez dépense ou rentrée.");
+        return;
+      }
+
       item.name = cleanName;
       item.amount = amount;
+      item.type = ["rentrée", "rentree"].includes(cleanType) ? "income" : "expense";
       saveState();
       render();
     }
 
-    function deleteExpense(id) {
-      const item = state.expenses.find(expense => expense.id === id);
+    function deleteTransaction(id) {
+      const item = state.transactions.find(transaction => transaction.id === id);
       if (!item) return;
 
       if (!confirm(`Supprimer « ${item.name} » ?`)) return;
 
-      state.expenses = state.expenses.filter(expense => expense.id !== id);
+      state.transactions = state.transactions.filter(transaction => transaction.id !== id);
       saveState();
       render();
     }
@@ -539,7 +591,7 @@
       const payload = {
         exportedAt: new Date().toISOString(),
         app: "suivi-budget-pwa",
-        version: 1,
+        version: 2,
         data: state
       };
 
@@ -558,21 +610,19 @@
         try {
           const parsed = JSON.parse(reader.result);
           const data = parsed.data || parsed;
+          const transactions = Array.isArray(data.transactions)
+            ? data.transactions
+            : Array.isArray(data.expenses)
+              ? data.expenses.map(item => ({ ...item, type: "expense" }))
+              : null;
 
-          if (!data || !Array.isArray(data.expenses)) {
+          if (!data || !Array.isArray(transactions)) {
             alert("Fichier non reconnu.");
             return;
           }
 
           state.budget = Math.round(Number(data.budget)) || 0;
-          state.expenses = data.expenses
-            .filter(item => item && typeof item.name === "string")
-            .map(item => ({
-              id: item.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
-              name: item.name.trim(),
-              amount: Math.round(Number(item.amount)) || 0,
-              createdAt: Number(item.createdAt) || Date.now()
-            }));
+          state.transactions = transactions.map(normalizeTransaction);
 
           saveState();
           render();
@@ -585,11 +635,8 @@
     }
 
     document.getElementById("editBudget").addEventListener("click", openBudgetDialog);
-
-    document.getElementById("toggleForm").addEventListener("click", () => {
-      formEl.classList.toggle("visible");
-      if (formEl.classList.contains("visible")) nameEl.focus();
-    });
+    document.getElementById("toggleExpenseForm").addEventListener("click", () => openTransactionForm("expense"));
+    document.getElementById("toggleIncomeForm").addEventListener("click", () => openTransactionForm("income"));
 
     formEl.addEventListener("submit", event => {
       event.preventDefault();
@@ -598,7 +645,7 @@
 
       if (!name || !Number.isFinite(amount) || amount < 0) return;
 
-      addExpense(name, amount);
+      addTransaction(name, amount, currentTransactionType);
       formEl.reset();
       nameEl.focus();
     });
@@ -618,6 +665,27 @@
     document.getElementById("exportPdf").addEventListener("click", exportPdf);
     document.getElementById("backupJson").addEventListener("click", backupJson);
     document.getElementById("restoreJson").addEventListener("click", () => restoreFile.click());
+    document.getElementById("resetMonth").addEventListener("click", () => resetDialog.showModal());
+    document.getElementById("cancelReset").addEventListener("click", () => resetDialog.close());
+
+    document.getElementById("clearTransactions").addEventListener("click", () => {
+      if (!confirm("Supprimer toutes les dépenses et rentrées, en conservant le budget actuel ?")) return;
+      state.transactions = [];
+      saveState();
+      resetDialog.close();
+      render();
+    });
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      if (!confirm("Tout remettre à zéro : budget, dépenses et rentrées ?")) return;
+      state.budget = 0;
+      state.transactions = [];
+      saveState();
+      resetDialog.close();
+      render();
+      setTimeout(openBudgetDialog, 200);
+    });
+
     restoreFile.addEventListener("change", () => {
       const file = restoreFile.files[0];
       if (file) restoreJson(file);
@@ -635,7 +703,7 @@
 
     render();
 
-    if (!state.budget && !state.expenses.length) {
+    if (!state.budget && !state.transactions.length) {
       setTimeout(openBudgetDialog, 200);
     }
   </script>

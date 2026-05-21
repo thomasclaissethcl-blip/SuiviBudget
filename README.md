@@ -1,6 +1,18 @@
 # Suivi de budget PWA
 
-Cette version est installable sur Android depuis un navigateur.
+Cette version est installable sur Android depuis un navigateur compatible PWA.
+
+## Fonctions
+
+- Définition du budget mensuel.
+- Ajout, modification et suppression de dépenses.
+- Ajout, modification et suppression de rentrées d’argent.
+- Calcul automatique du budget restant selon la formule : budget + rentrées - dépenses.
+- Recherche et tri des opérations.
+- Réinitialisation des opérations en conservant le budget, ou remise à zéro complète.
+- Export PDF via l’impression du navigateur.
+- Sauvegarde et import JSON.
+- Fonctionnement hors connexion après premier chargement.
 
 ## Fichiers inclus
 
