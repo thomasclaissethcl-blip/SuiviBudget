@@ -52,3 +52,10 @@ Sur Android :
 Les données sont stockées localement sur l’appareil via `localStorage`. L’application fonctionne aussi hors connexion après le premier chargement.
 
 Le bouton « Sauvegarder » exporte un fichier JSON de sécurité.
+
+
+## Installation Android en fenêtre autonome
+
+Pour que l’application s’ouvre avec sa propre icône et sans onglet de navigateur, elle doit être servie depuis GitHub Pages en HTTPS, avec les fichiers `index.html`, `manifest.webmanifest`, `service-worker.js`, `icon-192.png` et `icon-512.png` à la racine du dépôt.
+
+Après mise à jour du dépôt, ouvrez l’adresse GitHub Pages dans Chrome Android, puis utilisez le menu et choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil ». Si une ancienne version existe déjà, supprimez d’abord l’ancien raccourci, puis videz les données du site dans Chrome si l’installation continue à ouvrir un simple onglet.
